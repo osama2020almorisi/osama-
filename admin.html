@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d63384;
+            margin: 20px 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-group textarea {
+            height: 100px;
+        }
+
+        button {
+            background-color: #d63384;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #a71d60;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>لوحة التحكم</h1>
+    <div class="container">
+        <h2>إضافة ملف جديد</h2>
+        <form id="folderForm">
+            <div class="form-group">
+                <label for="folderName">اسم الملف:</label>
+                <input type="text" id="folderName" required>
+            </div>
+            <div class="form-group">
+                <label for="folderImage">رابط الصورة:</label>
+                <input type="text" id="folderImage" required>
+            </div>
+            <button type="submit">إضافة ملف</button>
+        </form>
+
+        <h2>إضافة منتج جديد</h2>
+        <form id="productForm">
+            <div class="form-group">
+                <label for="productName">اسم المنتج:</label>
+                <input type="text" id="productName" required>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">السعر:</label>
+                <input type="text" id="productPrice" required>
+            </div>
+            <div class="form-group">
+                <label for="productImages">روابط الصور (مفصولة بفاصلة):</label>
+                <textarea id="productImages" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productFolder">اسم الملف:</label>
+                <input type="text" id="productFolder" required>
+            </div>
+            <button type="submit">إضافة منتج</button>
+        </form>
+
+        <h2>عرض الملفات</h2>
+        <table id="foldersTable">
+            <thead>
+                <tr>
+                    <th>اسم الملف</th>
+                    <th>الصورة</th>
+                    <th>حذف</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <h2>عرض المنتجات</h2>
+        <table id="productsTable">
+            <thead>
+                <tr>
+                    <th>اسم المنتج</th>
+                    <th>السعر</th>
+                    <th>اسم الملف</th>
+                    <th>حذف</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const folders = JSON.parse(localStorage.getItem('folders')) || [];
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        function updateFoldersTable() {
+            const tableBody = document.getElementById('foldersTable').querySelector('tbody');
+            tableBody.innerHTML = folders.map((folder, index) => `
+                <tr>
+                    <td>${folder.name}</td>
+                    <td><img src="${folder.image}" alt="${folder.name}" style="width: 50px; height: 50px;"></td>
+                    <td><button onclick="deleteFolder(${index})">حذف</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateProductsTable() {
+            const tableBody = document.getElementById('productsTable').querySelector('tbody');
+            tableBody.innerHTML = products.map((product, index) => `
+                <tr>
+                    <td>${product.name}</td>
+                    <td>${product.price}</td>
+                    <td>${product.folder}</td>
+                    <td><button onclick="deleteProduct(${index})">حذف</button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('folderForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const folderName = document.getElementById('folderName').value;
+            const folderImage = document.getElementById('folderImage').value;
+
+            folders.push({ name: folderName, image: folderImage });
+            localStorage.setItem('folders', JSON.stringify(folders));
+            updateFoldersTable();
+        });
+
+        document.getElementById('productForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const productName = document.getElementById('productName').value;
+            const productPrice = document.getElementById('productPrice').value;
+            const productImages = document.getElementById('productImages').value.split(',');
+            const productFolder = document.getElementById('productFolder').value;
+
+            products.push({ name: productName, price: productPrice, images: productImages, folder: productFolder });
+            localStorage.setItem('products', JSON.stringify(products));
+            updateProductsTable();
+        });
+
+        function deleteFolder(index) {
+            folders.splice(index, 1);
+            localStorage.setItem('folders', JSON.stringify(folders));
+            updateFoldersTable();
+        }
+
+        function deleteProduct(index) {
+            products.splice(index, 1);
+            localStorage.setItem('products', JSON.stringify(products));
+            updateProductsTable();
+        }
+
+        updateFoldersTable();
+        updateProductsTable();
+    </script>
+</body>
+</html>
